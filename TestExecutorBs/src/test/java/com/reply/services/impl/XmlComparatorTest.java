@@ -16,7 +16,6 @@ public class XmlComparatorTest {
     @Test
     public void compareTest() throws URISyntaxException {
         XmlComparatorService service = new XmlComparatorService();
-        service.setVerbose(false);
         Path cblPath = Paths.get(getClass().getClassLoader()
                 .getResource("responses/cobol_response.xml").toURI());
         Path javaPath = Paths.get(getClass().getClassLoader()
@@ -27,10 +26,10 @@ public class XmlComparatorTest {
             String cblData = cblLines.collect(Collectors.joining("\n"));
             String javaData = javaLines.collect(Collectors.joining("\n"));
             service.setIgnoreSpaces(false);
-            boolean result = service.areEqual(cblData, javaData);
+            boolean result = service.areEqual(cblData, javaData).isMatch();
             Assert.assertFalse(result);
             service.setIgnoreSpaces(true);
-            result = service.areEqual(cblData, javaData);
+            result = service.areEqual(cblData, javaData).isMatch();
             Assert.assertTrue(result);
         } catch (IOException e) {
             e.printStackTrace();

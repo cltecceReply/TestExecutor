@@ -1,10 +1,14 @@
 package com.reply.services;
 
-import com.codahale.metrics.*;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Snapshot;
 import com.reply.io.dto.TERecord;
+import com.reply.services.impl.XmlComparatorService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.management.ServiceNotFoundException;
@@ -13,35 +17,50 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+@Slf4j
 @Component
 public class TestCaseProcessor {
 
     protected final static String OK_SUFFIX = "_OK";
     protected final static String KO_SUFFIX = "_KO";
+
+    @Value("${comparison.verbose:false}")
+    boolean verbose;
+    @Value("${comparison.ignoreSpaces:false}")
+    boolean ignoreSpaces;
+
     @Autowired
     IEndpointRetrievalService endpointRetrievalService;
     @Autowired
     IWsInvocator wsInvocator;
+
     @Autowired
     MetricRegistry metricRegistry;
 
-    public TestCaseProcessorOut executeTestCase(TERecord record) throws ExecutionException, InterruptedException, ServiceNotFoundException {
+    XmlComparatorService comparatorService;
+
+    public TestCaseProcessor(){
+        comparatorService =  XmlComparatorService.builder()
+                .ignoreSpaces(ignoreSpaces)
+                .build();
+    }
+
+    public TestCaseProcessorOut executeTestCase(TERecord teRecord) throws ExecutionException, InterruptedException, ServiceNotFoundException {
         TestCaseProcessorOut out = new TestCaseProcessorOut();
         CompletableFuture<String> actualResult;
         CompletableFuture<String> expectedResult;
-        boolean match;
-        Pair<String, String> endpointTarget = endpointRetrievalService.retrieveEndpointsPerService(record.getServiceName());
-        try (Timer.Context ctx = metricRegistry.timer(record.getServiceName() + "_ACT").time()) {
-            actualResult = wsInvocator.invokeService(endpointTarget.getLeft(), record.getRequest());
-        }
-        try (Timer.Context ctx = metricRegistry.timer(record.getServiceName() + "_EXP").time()) {
-            expectedResult = wsInvocator.invokeService(endpointTarget.getRight(), record.getRequest());
-        }
+        Pair<String, String> endpointTarget = endpointRetrievalService.retrieveEndpointsPerService(teRecord.getServiceName());
+        actualResult = wsInvocator.invokeService(endpointTarget.getLeft(), teRecord.getRequest());
+        expectedResult = wsInvocator.invokeService(endpointTarget.getRight(), teRecord.getRequest());
         out.setActual(actualResult.get());
         out.setExpected(expectedResult.get());
-        match = actualResult.get().equals(expectedResult.get());
-        metricRegistry.counter(getRegisterName(record.getServiceName(), match)).inc();
-        out.setPassed(match);
+        ComparisonOutcome outcome = comparatorService.areEqual(out.getExpected(), out.getActual());
+        if (verbose && !outcome.isMatch()) {
+            log.info("[{}][{}] Test Failed", teRecord.getServiceName(), teRecord.getTestId());
+            outcome.getDifferences().forEach(diff -> log.info("[{}][{}] {}", teRecord.getServiceName(), teRecord.getTestId(), diff));
+        }
+        out.setPassed(outcome.isMatch());
+        metricRegistry.counter(getRegisterName(teRecord.getServiceName(), out.isPassed())).inc();
         return out;
     }
 
