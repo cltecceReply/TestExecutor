@@ -3,12 +3,13 @@ package com.reply.services.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.InjectableValues;
 import com.reply.io.model.DbOperation;
+import com.reply.kafka.IOProviderService;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
 
-public class SymMessagesDeserialisationTest extends IOProviderService{
+public class SymMessagesDeserialisationTest extends IOProviderService {
 
     @Override
     protected InjectableValues injectEventType() {

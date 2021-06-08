@@ -14,6 +14,12 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Maven: org.xmlunit:xmlunit-core:2.8.2" level="project" />
+    <orderEntry type="library" name="Maven: jakarta.xml.bind:jakarta.xml.bind-api:2.3.3" level="project" />
+    <orderEntry type="library" name="Maven: jakarta.activation:jakarta.activation-api:1.2.2" level="project" />
+    <orderEntry type="library" name="Maven: org.xmlunit:xmlunit-matchers:2.8.2" level="project" />
+    <orderEntry type="library" name="Maven: org.hamcrest:hamcrest-core:2.2" level="project" />
+    <orderEntry type="library" name="Maven: org.hamcrest:hamcrest:2.2" level="project" />
     <orderEntry type="library" name="Maven: org.jooq:jool:0.9.1" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter:2.5.0" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot:2.5.0" level="project" />
@@ -108,8 +114,6 @@
     <orderEntry type="library" name="Maven: io.dropwizard.metrics:metrics-core:4.1.2" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: com.h2database:h2:1.4.200" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: junit:junit:4.13.2" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: org.hamcrest:hamcrest-core:2.2" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: org.hamcrest:hamcrest:2.2" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-context-support:5.2.8.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-beans:5.3.7" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter-data-jdbc:2.5.0" level="project" />

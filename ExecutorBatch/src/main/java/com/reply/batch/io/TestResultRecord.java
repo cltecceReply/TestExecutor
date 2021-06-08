@@ -8,4 +8,5 @@ public class TestResultRecord {
     private String serviceName;
     private String expected;
     private String actual;
+    private boolean passed;
 }

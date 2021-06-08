@@ -1,18 +1,16 @@
-package com.reply.services.impl;
+package com.reply.kafka;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.InjectableValues;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.reply.io.dto.IoEventDto;
-import com.reply.io.dto.IoOperationDto;
 import com.reply.io.model.DbOperation;
+import com.reply.kafka.dto.IoEventDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;

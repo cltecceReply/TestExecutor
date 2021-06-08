@@ -1,7 +1,7 @@
-package com.reply.io.dto;
+package com.reply.kafka.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.reply.io.jsondeserializer.IoEventJsonDeserializer;
+import com.reply.kafka.jsondeserializer.IoEventJsonDeserializer;
 import lombok.Data;
 
 @Data

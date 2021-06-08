@@ -1,7 +1,7 @@
 package com.reply.io.model;
 
 import com.reply.io.dto.EventTypeEnum;
-import com.reply.io.dto.IoEventDto;
+import com.reply.kafka.dto.IoEventDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

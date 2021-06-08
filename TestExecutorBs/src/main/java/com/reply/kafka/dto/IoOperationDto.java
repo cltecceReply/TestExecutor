@@ -1,5 +1,6 @@
-package com.reply.io.dto;
+package com.reply.kafka.dto;
 
+import com.reply.io.dto.EventTypeEnum;
 import lombok.Data;
 
 import java.io.Serializable;
