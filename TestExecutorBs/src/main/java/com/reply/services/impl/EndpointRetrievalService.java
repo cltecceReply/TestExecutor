@@ -23,7 +23,7 @@ public class EndpointRetrievalService implements IEndpointRetrievalService {
         if(endpoints != null){
             log.info("Endpoints Loaded: {}", endpoints);
             for(Map.Entry<String, List<String>> entry: endpoints.entrySet()) {
-                endpointsMapping.put(entry.getKey(), new ImmutablePair<>(entry.getValue().get(0), entry.getValue().get(0)));
+                endpointsMapping.put(entry.getKey(), new ImmutablePair<>(entry.getValue().get(0), entry.getValue().get(1)));
             }
         }
     }

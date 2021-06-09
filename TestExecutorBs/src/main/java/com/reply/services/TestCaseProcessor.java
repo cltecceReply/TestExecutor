@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ import java.text.DecimalFormat;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
@@ -30,6 +32,7 @@ public class TestCaseProcessor {
     boolean ignoreSpaces;
 
     @Autowired
+    @Qualifier("DbEndpointRetrivalService")
     IEndpointRetrievalService endpointRetrievalService;
     @Autowired
     IWsInvocator wsInvocator;
@@ -73,11 +76,11 @@ public class TestCaseProcessor {
 //        "Service, count, ok, ko, mean, min, max, median"
         String pattern = StringUtils.repeat("%13s", 12) + "%n";
         DecimalFormat df = new DecimalFormat("#.##");
-        StringBuilder builder = new StringBuilder("%n");
+        StringBuilder builder = new StringBuilder("\n");
         Map<String, Pair<String, String>> services = endpointRetrievalService.retrieveEndpointsPerService();
         builder.append(String.format(pattern, "SERVICE NAME", " COUNT", "OK", "KO",
-                "MEAN ACT", "MIN ACT", "MAX ACT", "MEDIAN ACT",
-                "MEAN EXP", "MIN EXP", "MAX EXP", "MEDIAN EXP"));
+                "MEAN ACT(ms)", "MIN ACT(ms)", "MAX ACT(ms)", "MEDIAN ACT(ms)",
+                "MEAN EXP(ms)", "MIN EXP(ms)", "MAX EXP(ms)", "MEDIAN EXP(ms)"));
         for (Map.Entry<String, Pair<String, String>> entry : services.entrySet()) {
             Snapshot snapshotAct = metricRegistry.timer(entry.getValue().getLeft()).getSnapshot();
             Snapshot snapshotExp = metricRegistry.timer(entry.getValue().getRight()).getSnapshot();
@@ -86,14 +89,14 @@ public class TestCaseProcessor {
                     metricRegistry.counter(entry.getKey()).getCount(),
                     metricRegistry.counter(getRegisterName(entry.getKey(), true)).getCount(),
                     metricRegistry.counter(getRegisterName(entry.getKey(), false)).getCount(),
-                    df.format(snapshotAct.getMean()),
-                    df.format(snapshotAct.getMin()),
-                    df.format(snapshotAct.getMax()),
-                    df.format(snapshotAct.getMedian()),
-                    df.format(snapshotExp.getMean()),
-                    df.format(snapshotExp.getMin()),
-                    df.format(snapshotExp.getMax()),
-                    df.format(snapshotExp.getMedian())
+                    TimeUnit.MILLISECONDS.convert(new Double(snapshotAct.getMean()).longValue(), TimeUnit.NANOSECONDS),
+                    TimeUnit.MILLISECONDS.convert(snapshotAct.getMin(), TimeUnit.NANOSECONDS),
+                    TimeUnit.MILLISECONDS.convert(snapshotAct.getMax(), TimeUnit.NANOSECONDS),
+                    TimeUnit.MILLISECONDS.convert(new Double(snapshotAct.getMedian()).longValue(), TimeUnit.NANOSECONDS),
+                    TimeUnit.MILLISECONDS.convert(new Double(snapshotExp.getMean()).longValue(), TimeUnit.NANOSECONDS),
+                    TimeUnit.MILLISECONDS.convert(snapshotExp.getMin(), TimeUnit.NANOSECONDS),
+                    TimeUnit.MILLISECONDS.convert(snapshotExp.getMax(), TimeUnit.NANOSECONDS),
+                    TimeUnit.MILLISECONDS.convert(new Double(snapshotExp.getMedian()).longValue(), TimeUnit.NANOSECONDS)
             ));
         }
         return builder.toString();

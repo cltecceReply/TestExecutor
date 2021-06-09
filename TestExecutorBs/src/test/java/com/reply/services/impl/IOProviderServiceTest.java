@@ -13,10 +13,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.*;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
@@ -30,6 +32,10 @@ import java.util.concurrent.TimeUnit;
 @Import(com.reply.services.impl.IOProviderServiceTest.KafkaTestConfigs.class)
 @SpringBootTest(classes = Application.class)
 @ComponentScan(excludeFilters = @ComponentScan.Filter(IgnoreDuringTest.class))
+@TestPropertySource(properties = {
+        "kafka.enabled=true",
+        "kafka.topic=T_GES_DOCU"
+})
 @DirtiesContext
 public class IOProviderServiceTest {
 
@@ -39,10 +45,10 @@ public class IOProviderServiceTest {
     @ClassRule
     public static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse(KAFKA_CONTAINER_NAME));
 
-    @Configuration
+    @TestConfiguration
     static class KafkaTestConfigs {
         @Bean
-        @Primary
+        @Lazy
         ConcurrentKafkaListenerContainerFactory<Integer, String> eventListener() {
             ConcurrentKafkaListenerContainerFactory<Integer, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
             factory.setConsumerFactory(consumerFactory());
@@ -50,12 +56,13 @@ public class IOProviderServiceTest {
         }
 
         @Bean
-        @Primary
+        @Lazy
         public ConsumerFactory<Integer, String> consumerFactory() {
             return new DefaultKafkaConsumerFactory<>(consumerConfigs());
         }
 
         @Bean
+        @Lazy
         public Map<String, Object> consumerConfigs() {
             Map<String, Object> props = new HashMap<>();
             props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafka.getBootstrapServers());
@@ -67,6 +74,7 @@ public class IOProviderServiceTest {
         }
 
         @Bean
+        @Lazy
         public ProducerFactory<String, String> producerFactory() {
             Map<String, Object> configProps = new HashMap<>();
             configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafka.getBootstrapServers());
@@ -76,6 +84,7 @@ public class IOProviderServiceTest {
         }
 
         @Bean
+        @Lazy
         public KafkaTemplate<String, String> kafkaTemplate(ProducerFactory<String, String> producerFactory) {
             return new KafkaTemplate<>(producerFactory);
         }

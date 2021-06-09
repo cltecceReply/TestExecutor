@@ -40,8 +40,10 @@ public class TestResultsItemWriter implements ItemWriter<TestResultRecord> {
     @AfterStep
     public void closeWriters() throws IOException {
         log.info("Closing writers...");
-        writerAct.close();
-        writerExp.close();
+        if(writerAct != null )
+            writerAct.close();
+        if(writerExp != null )
+            writerExp.close();
     }
 
     @Override

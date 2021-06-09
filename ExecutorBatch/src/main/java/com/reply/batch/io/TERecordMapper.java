@@ -14,14 +14,14 @@ public class TERecordMapper implements LineMapper<TERecord> {
     @Override
     public TERecord mapLine(String s, int i) throws Exception {
         Matcher matcher = pattern.matcher(s);
-        TERecord TERecord = new TERecord();
+        TERecord tERecord = new TERecord();
         if (matcher.find()) {
-            TERecord.setTestId(Integer.parseInt(matcher.group(1)));
-            TERecord.setServiceName(matcher.group(2));
-            TERecord.setRequest(matcher.group(3));
+            tERecord.setTestId(Integer.parseInt(matcher.group(1)));
+            tERecord.setServiceName(matcher.group(2));
+            tERecord.setRequest(matcher.group(3));
         } else {
             throw new IOException("Line " + i + " - Invalid Sintax for record: " + s);
         }
-        return TERecord;
+        return tERecord;
     }
 }
