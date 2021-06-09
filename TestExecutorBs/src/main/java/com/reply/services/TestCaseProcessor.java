@@ -59,7 +59,7 @@ public class TestCaseProcessor {
         out.setExpected(expectedResult.get());
         ComparisonOutcome outcome = comparatorService.areEqual(out.getExpected(), out.getActual());
         if (verbose && !outcome.isMatch()) {
-            log.info("[{}][{}] Test Failed", teRecord.getServiceName(), teRecord.getTestId());
+            log.info("[{}][{}] Test Failed with {} differences", teRecord.getServiceName(), teRecord.getTestId(), outcome.getDifferences().size());
             outcome.getDifferences().forEach(diff -> log.info("[{}][{}] {}", teRecord.getServiceName(), teRecord.getTestId(), diff));
         }
         out.setPassed(outcome.isMatch());

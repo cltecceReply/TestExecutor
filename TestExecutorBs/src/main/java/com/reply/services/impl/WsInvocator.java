@@ -61,13 +61,12 @@ public class WsInvocator implements IWsInvocator, InitializingBean {
             post.setEntity(new InputStreamEntity(new ByteArrayInputStream(xmlSoapRequest.getBytes(StandardCharsets.UTF_8))));
             post.setHeader("Content-type", "text/xml; charset=UTF-8");
             post.setHeader("SOAPAction", "");
-            try (Timer.Context ctx = metricRegistry.timer(endpoint).time()) {
-                try (CloseableHttpResponse response = httpclient.execute(post)) {
-                    HttpEntity entity = response.getEntity();
-                    res = EntityUtils.toString(entity);
-                    EntityUtils.consume(entity);
-                    resFut.complete(res);
-                }
+            try (Timer.Context ctx = metricRegistry.timer(endpoint).time();
+                 CloseableHttpResponse response = httpclient.execute(post)) {
+                HttpEntity entity = response.getEntity();
+                res = EntityUtils.toString(entity);
+                EntityUtils.consume(entity);
+                resFut.complete(res);
             }
         } catch (Exception e) {
             log.warn("Invokation failed: ", e);

@@ -34,6 +34,6 @@ public class DbEndpointRetrivalService implements IEndpointRetrievalService {
         ServiceDescription desc = repo.findByServiceName(serviceName);
         if (desc == null)
             throw new ServiceNotFoundException("Endpoint not found for service: " + serviceName);
-        return new ImmutablePair<>(desc.getEndpointlegacy(), desc.getEndpointOpen());
+        return new ImmutablePair<>(desc.getEndpointOpen(), desc.getEndpointlegacy());
     }
 }

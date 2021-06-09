@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RunWith(SpringJUnit4ClassRunner.class)
-@Import(com.reply.services.impl.IOProviderServiceTest.KafkaTestConfigs.class)
+@Import(IOProviderServiceIT.KafkaTestConfigs.class)
 @SpringBootTest(classes = Application.class)
 @ComponentScan(excludeFilters = @ComponentScan.Filter(IgnoreDuringTest.class))
 @TestPropertySource(properties = {
@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit;
         "kafka.topic=T_GES_DOCU"
 })
 @DirtiesContext
-public class IOProviderServiceTest {
+public class IOProviderServiceIT {
 
     protected static final String TOPIC = "T_GES_DOCU";
     protected static final String KAFKA_CONTAINER_NAME = "confluentinc/cp-kafka:5.4.3";
