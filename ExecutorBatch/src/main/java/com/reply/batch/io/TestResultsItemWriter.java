@@ -50,7 +50,9 @@ public class TestResultsItemWriter implements ItemWriter<TestResultRecord> {
     public void write(List<? extends TestResultRecord> list) throws Exception {
         for(TestResultRecord rec : list){
             writerAct.write(rec.getActual());
+            writerAct.write("\n");
             writerExp.write(rec.getExpected());
+            writerExp.write("\n");
         }
     }
 

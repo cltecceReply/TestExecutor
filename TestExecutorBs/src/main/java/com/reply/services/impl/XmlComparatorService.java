@@ -3,6 +3,7 @@ package com.reply.services.impl;
 import com.reply.services.ComparisonOutcome;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
+import org.xmlunit.XMLUnitException;
 import org.xmlunit.builder.DiffBuilder;
 import org.xmlunit.diff.Diff;
 import org.xmlunit.diff.Difference;
@@ -26,8 +27,15 @@ public class XmlComparatorService {
     }
 
     public ComparisonOutcome areEqual(String target, String actual) {
-        Diff diff = this.buildComparator(target, actual);
         ComparisonOutcome compareOutput = new ComparisonOutcome();
+        Diff diff;
+        try {
+            diff = this.buildComparator(target, actual);
+        } catch(XMLUnitException e){
+            log.warn("Error during comparison: {}", e.getMessage());
+            compareOutput.setMatch(false);
+            return compareOutput;
+        }
         List<String> differences = new LinkedList<>();
         compareOutput.setMatch(!diff.hasDifferences());
         if (diff.hasDifferences()) {
