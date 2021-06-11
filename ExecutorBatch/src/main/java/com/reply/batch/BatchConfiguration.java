@@ -5,6 +5,7 @@ import com.reply.batch.io.TestResultsItemWriter;
 import com.reply.batch.processor.TestCasesItemProcessor;
 import com.reply.io.dto.TERecord;
 import com.zaxxer.hikari.HikariDataSource;
+import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -37,8 +38,6 @@ public class BatchConfiguration {
 
     @Value("${file.input}")
     protected String inputPath;
-    @Value("${file.output}")
-    protected String outputPath;
 
     @Autowired
     private JobBuilderFactory jobs;
@@ -62,11 +61,14 @@ public class BatchConfiguration {
 //    }
 
     @Bean
-    public JdbcCursorItemReader<TERecord> testCasesItemReader() {
+    public JdbcCursorItemReader<TERecord> testCasesItemReader(@Value("${services.name:null}") String service_name) {
+        String query = "select TEST_ID, TEST_DATA, SERVICE_NAME from DB2INST1.TEST_CASES";
+        if(!"null".equals(service_name))
+            query += String.format(" WHERE SERVICE_NAME= '%s'", service_name);
         return new JdbcCursorItemReaderBuilder<TERecord>()
                 .dataSource(this.dataSource)
                 .name("testCaseReader")
-                .sql("select TEST_ID, TEST_DATA, SERVICE_NAME from DB2INST1.TEST_CASES")
+                .sql(query)
                 .rowMapper((rs, i) ->
                 {
                     TERecord testRecord = new TERecord();
@@ -80,7 +82,7 @@ public class BatchConfiguration {
     }
 
     @Bean
-    ItemWriter<TestResultRecord> testResultRecordItemWriter() {
+    ItemWriter<TestResultRecord> testResultRecordItemWriter(@Value("${file.output}") String outputPath) {
         return new TestResultsItemWriter(outputPath);
     }
 
