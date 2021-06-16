@@ -3,6 +3,9 @@ package com.reply.services;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Snapshot;
 import com.reply.io.dto.TERecord;
+import com.reply.io.model.DbOperation;
+import com.reply.kafka.IIOProviderService;
+import com.reply.kafka.IOProviderService;
 import com.reply.services.impl.XmlComparatorService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -12,8 +15,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import javax.management.ServiceNotFoundException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -30,13 +37,16 @@ public class TestCaseProcessor {
     boolean verbose;
     @Value("${comparison.ignoreSpaces:false}")
     boolean ignoreSpaces;
+    @Value("${comparison.writesleep:5}")
+    int writeSleep;
 
     @Autowired
     @Qualifier("DbEndpointRetrivalService")
     IEndpointRetrievalService endpointRetrievalService;
     @Autowired
     IWsInvocator wsInvocator;
-
+    @Autowired
+    IIOProviderService ioProviderService;
     @Autowired
     MetricRegistry metricRegistry;
 
@@ -48,13 +58,33 @@ public class TestCaseProcessor {
                 .build();
     }
 
+    @PostConstruct
+    public void init(){
+        log.info("Configuration:");
+        log.info("write sleep time: {} THIS VALUE MUST MATCH THE POLLING RATE OF THE STORE NODE!!", writeSleep);
+    }
     public TestCaseProcessorOut executeTestCase(TERecord teRecord) throws ExecutionException, InterruptedException, ServiceNotFoundException {
         TestCaseProcessorOut out = new TestCaseProcessorOut();
         CompletableFuture<String> actualResult;
         CompletableFuture<String> expectedResult;
+        List<DbOperation> writesActual = new ArrayList<>();
+        List<DbOperation> writesExpected = new ArrayList<>();
+        boolean writeMatch = true;
+
         Pair<String, String> endpointTarget = endpointRetrievalService.retrieveEndpointsPerService(teRecord.getServiceName());
         actualResult = wsInvocator.invokeService(endpointTarget.getLeft(), teRecord.getRequest());
+        if(teRecord.isWrite()) {
+            //Devo aspettare la fine dell'elaborazione per recuperare i dati sulle scritture
+            actualResult.join();
+            writesActual = this.retrieveWrites();
+        }
         expectedResult = wsInvocator.invokeService(endpointTarget.getRight(), teRecord.getRequest());
+        if(teRecord.isWrite()) {
+            //Devo aspettare la fine dell'elaborazione per recuperare i dati sulle scritture
+            actualResult.join();
+            writesExpected = this.retrieveWrites();
+        }
+
         out.setActual(actualResult.get());
         out.setExpected(expectedResult.get());
         ComparisonOutcome outcome = comparatorService.areEqual(out.getExpected(), out.getActual());
@@ -62,9 +92,45 @@ public class TestCaseProcessor {
             log.info("[{}][{}] Test Failed with {} differences", teRecord.getServiceName(), teRecord.getTestId(), outcome.getDifferences().size());
             outcome.getDifferences().forEach(diff -> log.info("[{}][{}] {}", teRecord.getServiceName(), teRecord.getTestId(), diff));
         }
-        out.setPassed(outcome.isMatch());
+        if(teRecord.isWrite())
+            writeMatch = this.compareWrites(teRecord, writesActual, writesExpected);
+        out.setPassed(outcome.isMatch() && writeMatch);
         metricRegistry.counter(getRegisterName(teRecord.getServiceName(), out.isPassed())).inc();
         return out;
+    }
+
+    private List<DbOperation> retrieveWrites() {
+        List<DbOperation> ops;
+        try {
+            TimeUnit.SECONDS.sleep(writeSleep);
+        } catch (InterruptedException ie) {
+            log.error("Unable to wait");
+            Thread.currentThread().interrupt();
+        }
+        return ioProviderService.getAndFlush();
+    }
+
+    private boolean compareWrites(TERecord teRecord, List<DbOperation> actual, List<DbOperation> expected) {
+        if(actual.size() != expected.size())
+            return false;
+        boolean eq  = true;
+        int i = 0;
+        Iterator<DbOperation> e = expected.iterator();
+        Iterator<DbOperation> a = actual.iterator();
+        DbOperation opA = null;
+        DbOperation opE = null;
+        while(e.hasNext() && a.hasNext() && eq){
+            opA = a.next();
+            opE = e.next();
+            eq =  opA.equals(opE);
+            i++;
+        }
+        if(!eq && verbose){
+            log.info("[{}][{}] Writes op n. {} do not match", teRecord.getServiceName(), teRecord.getTestId(), i);
+            log.info("[{}][{}] Expected: |{}|", teRecord.getServiceName(), teRecord.getTestId(), opE);
+            log.info("[{}][{}] Actual  : |{}|", teRecord.getServiceName(), teRecord.getTestId(), opA);
+        }
+        return eq ;
     }
 
     protected String getRegisterName(String serviceName, boolean outType) {

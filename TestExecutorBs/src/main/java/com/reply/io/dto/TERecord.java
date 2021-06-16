@@ -13,4 +13,5 @@ public class TERecord implements Serializable {
     private long testId;
     private String serviceName;
     private String request;
+    private boolean write;
 }

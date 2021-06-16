@@ -4,6 +4,7 @@ import com.reply.batch.io.TestResultRecord;
 import com.reply.batch.io.TestResultsItemWriter;
 import com.reply.batch.processor.TestCasesItemProcessor;
 import com.reply.io.dto.TERecord;
+import com.reply.repo.entity.TestCase;
 import com.zaxxer.hikari.HikariDataSource;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -62,9 +63,10 @@ public class BatchConfiguration {
 
     @Bean
     public JdbcCursorItemReader<TERecord> testCasesItemReader(@Value("${services.name:null}") String service_name) {
-        String query = "select TEST_ID, TEST_DATA, SERVICE_NAME from DB2INST1.TEST_CASES";
+        String query = "select TEST_ID, TEST_DATA, SERVICE_NAME, TEST_WRITE from DB2INST1.TEST_CASES";
         if(!"null".equals(service_name))
             query += String.format(" WHERE SERVICE_NAME= '%s'", service_name);
+        query += " ORDER BY TEST_ID asc";
         return new JdbcCursorItemReaderBuilder<TERecord>()
                 .dataSource(this.dataSource)
                 .name("testCaseReader")
@@ -75,6 +77,7 @@ public class BatchConfiguration {
                     testRecord.setTestId(rs.getLong("TEST_ID"));
                     testRecord.setRequest(rs.getString("TEST_DATA"));
                     testRecord.setServiceName(rs.getString("SERVICE_NAME"));
+                    testRecord.setWrite("Y".equals(rs.getString("TEST_WRITE")));
                     return testRecord;
                 })
                 .build();

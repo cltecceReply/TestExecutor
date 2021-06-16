@@ -7,6 +7,9 @@ import org.springframework.batch.item.file.transform.FieldSet;
 public class RecordFieldSetMapper implements FieldSetMapper<TERecord> {
     @Override
     public TERecord mapFieldSet(FieldSet fieldSet){
-        return new TERecord(fieldSet.readLong(0), fieldSet.readString(1), fieldSet.readString(2));
+        return new TERecord(fieldSet.readLong(0),
+                fieldSet.readString(1),
+                fieldSet.readString(2),
+                false);
     }
 }

@@ -12,6 +12,9 @@ import javax.persistence.Table;
 @Table(name="TEST_CASES")
 public class TestCase {
 
+    public enum WriteEnum{
+        Y,N;
+    }
     @Id
     @Column(name="TEST_ID")
     private long testId;
@@ -19,4 +22,8 @@ public class TestCase {
     private String serviceName;
     @Column(name="TEST_DATA")
     private String request;
+    @Column(name = "TEST_WRITE")
+    private WriteEnum write;
+
+    public boolean isWrite(){return WriteEnum.Y.equals(write);}
 }

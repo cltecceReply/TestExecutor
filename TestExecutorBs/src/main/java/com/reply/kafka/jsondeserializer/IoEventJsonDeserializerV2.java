@@ -16,13 +16,13 @@ import java.util.Iterator;
 import java.util.Map;
 
 @Slf4j
-public class IoEventJsonDeserializer extends StdDeserializer<IoEventDto> {
+public class IoEventJsonDeserializerV2 extends StdDeserializer<IoEventDto> {
 
-    public IoEventJsonDeserializer() {
+    public IoEventJsonDeserializerV2() {
         this(null);
     }
 
-    public IoEventJsonDeserializer(Class<?> vc) {
+    public IoEventJsonDeserializerV2(Class<?> vc) {
         super(vc);
     }
     @Override
@@ -32,16 +32,11 @@ public class IoEventJsonDeserializer extends StdDeserializer<IoEventDto> {
         IoEventDto ioEventDto = new IoEventDto();
 
         JsonNode rootNode = jp.getCodec().readTree(jp);
-        String tableName = rootNode.fieldNames().next();
+        String tableName = rootNode.get("table_name").asText();
         ioEventDto.setTableName(tableName);
-        JsonNode rowsNode = rootNode.path(tableName);
-        Iterator<JsonNode> elements = rowsNode.elements();
-        if(!elements.hasNext())
-            throw new IOException("Unexpected end of the record");
-        ioEventDto.getOperation().setEventType(EventTypeEnum.valueOf(elements.next().asText()));
-        if(!elements.hasNext())
-            throw new IOException("Unexpected end of the record");
-        Map<String, String> values =  mapper.treeToValue(elements.next(), HashMap.class);
+        ioEventDto.getOperation().setEventType(EventTypeEnum.valueOf(rootNode.get("eventType").asText()));
+        JsonNode rowsNode = rootNode.path("data");
+        Map<String, String> values =  mapper.treeToValue(rowsNode, HashMap.class);
         ioEventDto.getOperation().setData(values);
         return ioEventDto;
     }
