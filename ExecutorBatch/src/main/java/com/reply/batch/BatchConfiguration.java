@@ -27,6 +27,9 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 
 @Slf4j
 @EnableBatchProcessing
@@ -63,14 +66,26 @@ public class BatchConfiguration {
 
     @Bean
     public JdbcCursorItemReader<TERecord> testCasesItemReader(@Value("${services.name:null}") String service_name) {
-        String query = "select TEST_ID, TEST_DATA, SERVICE_NAME, TEST_WRITE from DB2INST1.TEST_CASES";
-        if(!"null".equals(service_name))
-            query += String.format(" WHERE SERVICE_NAME= '%s'", service_name);
-        query += " ORDER BY TEST_ID asc";
+        StringBuilder queryBuilder =  new StringBuilder("select TEST_ID, TEST_DATA, SERVICE_NAME, TEST_WRITE ")
+                .append(" from DB2INST1.TEST_CASES ");
+        String where = " WHERE SERVICE_NAME ";
+        if(!"null".equals(service_name) && service_name.split(",").length <= 1)
+            queryBuilder.append(String.format(" %s= '%s'", where, service_name));
+        else if (!"null".equals(service_name)) {
+            String names = Arrays.stream(service_name.split(","))
+                    .map(n -> String.format("'%s'", n.trim()))
+                    .reduce((a, b) -> String.join(", ", a, b))
+                    .orElse("");
+            queryBuilder.append(where)
+                    .append(" IN (")
+                    .append(names)
+                    .append(" )");
+        }
+        queryBuilder.append(" ORDER BY TEST_ID asc");
         return new JdbcCursorItemReaderBuilder<TERecord>()
                 .dataSource(this.dataSource)
                 .name("testCaseReader")
-                .sql(query)
+                .sql(queryBuilder.toString())
                 .rowMapper((rs, i) ->
                 {
                     TERecord testRecord = new TERecord();
