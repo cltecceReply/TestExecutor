@@ -1,10 +1,9 @@
 package com.reply.io.model;
 
 import com.reply.io.dto.EventTypeEnum;
-import com.reply.kafka.dto.IoEventDto;
+import com.reply.dto.IoEventDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
 import java.util.Map;

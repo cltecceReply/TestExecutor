@@ -1,4 +1,4 @@
-package com.reply.services;
+package com.reply.model;
 
 import lombok.Data;
 

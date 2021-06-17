@@ -1,6 +1,6 @@
 package com.reply.services.impl;
 
-import com.reply.kafka.IOProviderService;
+import com.reply.services.writes.kafka.IOProviderService;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import com.reply.Application;

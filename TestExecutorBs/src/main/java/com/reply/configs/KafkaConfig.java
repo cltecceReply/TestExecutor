@@ -1,4 +1,4 @@
-package com.reply.kafka;
+package com.reply.configs;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;

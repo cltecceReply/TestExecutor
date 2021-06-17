@@ -1,8 +1,7 @@
-package com.reply.services.impl;
+package com.reply.services.invoker;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.reply.services.IWsInvocator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
@@ -24,7 +23,7 @@ import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
-public class WsInvocator implements IWsInvocator, InitializingBean {
+public class WebServiceInvoker implements IWebServiceInvoker, InitializingBean {
 
     @Value("${httpclient.sockettimeout:3}")
     protected int socketTimeout;

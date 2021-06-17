@@ -1,17 +1,16 @@
-package com.reply.kafka;
+package com.reply.services.writes.kafka;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.InjectableValues;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.reply.io.model.DbOperation;
-import com.reply.kafka.dto.IoEventDto;
-import com.reply.kafka.jsondeserializer.IoEventJsonDeserializer;
-import com.reply.kafka.jsondeserializer.IoEventJsonDeserializerV2;
+import com.reply.dto.IoEventDto;
+import com.reply.services.writes.IIOProviderService;
+import com.reply.services.writes.kafka.jsondeserializer.IoEventJsonDeserializer;
+import com.reply.services.writes.kafka.jsondeserializer.IoEventJsonDeserializerV2;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -23,13 +22,13 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @ConditionalOnProperty(value="kafka.enabled", havingValue="true")
-public class IOProviderService implements IIOProviderService{
+public class IOProviderService implements IIOProviderService {
 
     Queue<List<DbOperation>> ops = new LinkedList<>();
     AtomicLong idFactory = new AtomicLong();
     StdDeserializer<IoEventDto> deserializer;
 
-    public IOProviderService(@Value("${kafka.format}") int kafkaFormat){
+    public IOProviderService(@Value("${kafka.format:0}") int kafkaFormat){
         switch(kafkaFormat){
             case 1:
                 deserializer = new IoEventJsonDeserializerV2();

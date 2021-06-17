@@ -1,8 +1,8 @@
 package com.reply.batch.processor;
 
 import com.reply.batch.io.TestResultRecord;
-import com.reply.services.TestCaseProcessor;
-import com.reply.services.TestCaseProcessorOut;
+import com.reply.services.processor.TestCaseProcessor;
+import com.reply.model.TestCaseProcessorOut;
 import com.reply.io.dto.TERecord;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.annotation.AfterStep;

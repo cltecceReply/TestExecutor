@@ -1,5 +1,6 @@
 package com.reply.services.impl;
 
+import com.reply.services.comparator.XmlComparatorService;
 import org.junit.Assert;
 import org.junit.Test;
 

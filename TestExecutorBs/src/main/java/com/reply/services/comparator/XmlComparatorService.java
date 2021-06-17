@@ -1,6 +1,6 @@
-package com.reply.services.impl;
+package com.reply.services.comparator;
 
-import com.reply.services.ComparisonOutcome;
+import com.reply.model.ComparisonOutcome;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.xmlunit.XMLUnitException;

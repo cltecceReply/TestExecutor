@@ -1,6 +1,6 @@
-package com.reply.services.impl;
+package com.reply.services.endpoint;
 
-import com.reply.services.IEndpointRetrievalService;
+import com.reply.services.endpoint.IEndpointRetrievalService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;

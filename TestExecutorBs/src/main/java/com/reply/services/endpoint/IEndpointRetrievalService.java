@@ -1,4 +1,4 @@
-package com.reply.services;
+package com.reply.services.endpoint;
 
 
 import org.apache.commons.lang3.tuple.Pair;

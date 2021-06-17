@@ -1,9 +1,7 @@
-package com.reply.kafka;
+package com.reply.services.writes.kafka;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.InjectableValues;
 import com.reply.io.model.DbOperation;
-import com.reply.kafka.IOProviderService;
 import org.junit.Assert;
 import org.junit.Test;
 

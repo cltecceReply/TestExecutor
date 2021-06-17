@@ -1,4 +1,4 @@
-package com.reply.kafka;
+package com.reply.services.writes;
 
 import com.reply.io.model.DbOperation;
 

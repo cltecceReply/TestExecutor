@@ -1,4 +1,4 @@
-package com.reply.kafka.dto;
+package com.reply.dto;
 
 import com.reply.io.dto.EventTypeEnum;
 import lombok.Data;

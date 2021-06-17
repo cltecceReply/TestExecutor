@@ -1,8 +1,8 @@
-package com.reply.services.impl;
+package com.reply.services.endpoint;
 
 import com.reply.repo.entity.ServiceDescription;
 import com.reply.repo.repository.ServiceDescriptionRepository;
-import com.reply.services.IEndpointRetrievalService;
+import com.reply.services.endpoint.IEndpointRetrievalService;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;

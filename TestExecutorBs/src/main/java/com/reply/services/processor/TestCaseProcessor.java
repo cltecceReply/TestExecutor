@@ -1,12 +1,15 @@
-package com.reply.services;
+package com.reply.services.processor;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Snapshot;
 import com.reply.io.dto.TERecord;
 import com.reply.io.model.DbOperation;
-import com.reply.kafka.IIOProviderService;
-import com.reply.kafka.IOProviderService;
-import com.reply.services.impl.XmlComparatorService;
+import com.reply.model.ComparisonOutcome;
+import com.reply.model.TestCaseProcessorOut;
+import com.reply.services.comparator.XmlComparatorService;
+import com.reply.services.endpoint.IEndpointRetrievalService;
+import com.reply.services.invoker.IWebServiceInvoker;
+import com.reply.services.writes.IIOProviderService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -17,7 +20,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.management.ServiceNotFoundException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -42,13 +44,13 @@ public class TestCaseProcessor {
 
     @Autowired
     @Qualifier("DbEndpointRetrivalService")
-    IEndpointRetrievalService endpointRetrievalService;
+    protected IEndpointRetrievalService endpointRetrievalService;
     @Autowired
-    IWsInvocator wsInvocator;
+    protected IWebServiceInvoker wsInvocator;
     @Autowired
-    IIOProviderService ioProviderService;
-    @Autowired
-    MetricRegistry metricRegistry;
+    protected IIOProviderService ioProviderService;
+    @Autowired(required = false)
+    protected MetricRegistry metricRegistry;
 
     XmlComparatorService comparatorService;
 
@@ -95,7 +97,7 @@ public class TestCaseProcessor {
         if(teRecord.isWrite())
             writeMatch = this.compareWrites(teRecord, writesActual, writesExpected);
         out.setPassed(outcome.isMatch() && writeMatch);
-        metricRegistry.counter(getRegisterName(teRecord.getServiceName(), out.isPassed())).inc();
+        if(metricRegistry != null) metricRegistry.counter(getRegisterName(teRecord.getServiceName(), out.isPassed())).inc();
         return out;
     }
 
@@ -139,9 +141,10 @@ public class TestCaseProcessor {
     }
 
     public String getReport() {
+        if(this.metricRegistry == null)
+            return "Report Not Available";
 //        "Service, count, ok, ko, mean, min, max, median"
         String pattern = StringUtils.repeat("%13s", 12) + "%n";
-        DecimalFormat df = new DecimalFormat("#.##");
         StringBuilder builder = new StringBuilder("\n");
         Map<String, Pair<String, String>> services = endpointRetrievalService.retrieveEndpointsPerService();
         builder.append(String.format(pattern, "SERVICE NAME", " COUNT", "OK", "KO",
