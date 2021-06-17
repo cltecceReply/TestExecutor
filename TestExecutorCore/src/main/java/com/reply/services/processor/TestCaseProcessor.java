@@ -34,6 +34,7 @@ public class TestCaseProcessor {
 
     protected final static String OK_SUFFIX = "_OK";
     protected final static String KO_SUFFIX = "_KO";
+    private static final int REPORT_ITEMS = 12;
 
     @Value("${comparison.verbose:false}")
     boolean verbose;
@@ -54,17 +55,18 @@ public class TestCaseProcessor {
 
     XmlComparatorService comparatorService;
 
-    public TestCaseProcessor(){
-        comparatorService =  XmlComparatorService.builder()
+    public TestCaseProcessor() {
+        comparatorService = XmlComparatorService.builder()
                 .ignoreSpaces(ignoreSpaces)
                 .build();
     }
 
     @PostConstruct
-    public void init(){
+    public void init() {
         log.info("Configuration:");
         log.info("write sleep time: {} THIS VALUE MUST MATCH THE POLLING RATE OF THE STORE NODE!!", writeSleep);
     }
+
     public TestCaseProcessorOut executeTestCase(TERecord teRecord) throws ExecutionException, InterruptedException, ServiceNotFoundException {
         TestCaseProcessorOut out = new TestCaseProcessorOut();
         CompletableFuture<String> actualResult;
@@ -75,13 +77,13 @@ public class TestCaseProcessor {
 
         Pair<String, String> endpointTarget = endpointRetrievalService.retrieveEndpointsPerService(teRecord.getServiceName());
         actualResult = wsInvocator.invokeService(endpointTarget.getLeft(), teRecord.getRequest());
-        if(teRecord.isWrite()) {
+        if (teRecord.isWrite()) {
             //Devo aspettare la fine dell'elaborazione per recuperare i dati sulle scritture
             actualResult.join();
             writesActual = this.retrieveWrites();
         }
         expectedResult = wsInvocator.invokeService(endpointTarget.getRight(), teRecord.getRequest());
-        if(teRecord.isWrite()) {
+        if (teRecord.isWrite()) {
             //Devo aspettare la fine dell'elaborazione per recuperare i dati sulle scritture
             actualResult.join();
             writesExpected = this.retrieveWrites();
@@ -94,10 +96,11 @@ public class TestCaseProcessor {
             log.info("[{}][{}] Test Failed with {} differences", teRecord.getServiceName(), teRecord.getTestId(), outcome.getDifferences().size());
             outcome.getDifferences().forEach(diff -> log.info("[{}][{}] {}", teRecord.getServiceName(), teRecord.getTestId(), diff));
         }
-        if(teRecord.isWrite())
+        if (teRecord.isWrite())
             writeMatch = this.compareWrites(teRecord, writesActual, writesExpected);
         out.setPassed(outcome.isMatch() && writeMatch);
-        if(metricRegistry != null) metricRegistry.counter(getRegisterName(teRecord.getServiceName(), out.isPassed())).inc();
+        if (metricRegistry != null)
+            metricRegistry.counter(getRegisterName(teRecord.getServiceName(), out.isPassed())).inc();
         return out;
     }
 
@@ -113,26 +116,26 @@ public class TestCaseProcessor {
     }
 
     private boolean compareWrites(TERecord teRecord, List<DbOperation> actual, List<DbOperation> expected) {
-        if(actual.size() != expected.size())
+        if (actual.size() != expected.size())
             return false;
-        boolean eq  = true;
+        boolean eq = true;
         int i = 0;
         Iterator<DbOperation> e = expected.iterator();
         Iterator<DbOperation> a = actual.iterator();
         DbOperation opA = null;
         DbOperation opE = null;
-        while(e.hasNext() && a.hasNext() && eq){
+        while (e.hasNext() && a.hasNext() && eq) {
             opA = a.next();
             opE = e.next();
-            eq =  opA.equals(opE);
+            eq = opA.equals(opE);
             i++;
         }
-        if(!eq && verbose){
+        if (!eq && verbose) {
             log.info("[{}][{}] Writes op n. {} do not match", teRecord.getServiceName(), teRecord.getTestId(), i);
             log.info("[{}][{}] Expected: |{}|", teRecord.getServiceName(), teRecord.getTestId(), opE);
             log.info("[{}][{}] Actual  : |{}|", teRecord.getServiceName(), teRecord.getTestId(), opA);
         }
-        return eq ;
+        return eq;
     }
 
     protected String getRegisterName(String serviceName, boolean outType) {
@@ -141,23 +144,26 @@ public class TestCaseProcessor {
     }
 
     public String getReport() {
-        if(this.metricRegistry == null)
+        if (this.metricRegistry == null)
             return "Report Not Available";
 //        "Service, count, ok, ko, mean, min, max, median"
-        String pattern = StringUtils.repeat("%13s", 12) + "%n";
+        String pattern = StringUtils.repeat("|%13s", REPORT_ITEMS) + "%n";
         StringBuilder builder = new StringBuilder("\n");
         Map<String, Pair<String, String>> services = endpointRetrievalService.retrieveEndpointsPerService();
         builder.append(String.format(pattern, "SERVICE NAME", " COUNT", "OK", "KO",
                 "MEAN ACT(ms)", "MIN ACT(ms)", "MAX ACT(ms)", "MEDIAN ACT(ms)",
-                "MEAN EXP(ms)", "MIN EXP(ms)", "MAX EXP(ms)", "MEDIAN EXP(ms)"));
+                "MEAN EXP(ms)", "MIN EXP(ms)", "MAX EXP(ms)", "MEDIAN EXP(ms)"))
+                .append("|").append(StringUtils.repeat("-", 14*REPORT_ITEMS)).append("|\n");
         for (Map.Entry<String, Pair<String, String>> entry : services.entrySet()) {
             Snapshot snapshotAct = metricRegistry.timer(entry.getValue().getLeft()).getSnapshot();
             Snapshot snapshotExp = metricRegistry.timer(entry.getValue().getRight()).getSnapshot();
+            long testOk = metricRegistry.counter(getRegisterName(entry.getKey(), true)).getCount();
+            long testKo = metricRegistry.counter(getRegisterName(entry.getKey(), false)).getCount();
             builder.append(String.format(pattern,
                     entry.getKey(),
-                    metricRegistry.counter(entry.getKey()).getCount(),
-                    metricRegistry.counter(getRegisterName(entry.getKey(), true)).getCount(),
-                    metricRegistry.counter(getRegisterName(entry.getKey(), false)).getCount(),
+                    testOk + testKo,
+                    testOk,
+                    testKo,
                     TimeUnit.MILLISECONDS.convert(new Double(snapshotAct.getMean()).longValue(), TimeUnit.NANOSECONDS),
                     TimeUnit.MILLISECONDS.convert(snapshotAct.getMin(), TimeUnit.NANOSECONDS),
                     TimeUnit.MILLISECONDS.convert(snapshotAct.getMax(), TimeUnit.NANOSECONDS),
