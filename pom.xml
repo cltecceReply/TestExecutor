@@ -12,7 +12,7 @@
     </parent>
 
     <modules>
-        <module>TestExecutorBs</module>
+        <module>TestExecutorCore</module>
         <module>ExecutorBatch</module>
     </modules>
 

@@ -12,7 +12,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="TestExecutorBs" />
+    <orderEntry type="module" module-name="TestExecutorCore" />
+    <orderEntry type="library" name="Maven: com.reply:TestExecutorBs:1.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.xmlunit:xmlunit-core:2.8.2" level="project" />
     <orderEntry type="library" name="Maven: org.xmlunit:xmlunit-matchers:2.8.2" level="project" />
     <orderEntry type="library" name="Maven: org.jooq:jool:0.9.1" level="project" />
