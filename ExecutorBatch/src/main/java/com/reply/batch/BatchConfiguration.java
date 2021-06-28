@@ -55,14 +55,6 @@ public class BatchConfiguration {
     @Autowired
     HikariDataSource dataSource;
 
-//    @Bean
-//    public ItemReader<TERecord> testCasesItemReader() {
-//        log.debug("Input Path:  {}", inputPath);
-//        FlatFileItemReader<TERecord> reader = new FlatFileItemReader<>();
-//        reader.setResource(new FileSystemResource(inputPath));
-//        reader.setLineMapper(new TERecordMapper());
-//        return reader;
-//    }
 
     @Bean
     public JdbcCursorItemReader<TERecord> testCasesItemReader(@Value("${services.name:null}") String service_name) {
@@ -113,7 +105,6 @@ public class BatchConfiguration {
 
     }
     @Bean
-//    protected Step stepDefinition(ItemReader<TERecord> testCasesItemReader,
     protected Step stepDefinition(JdbcCursorItemReader<TERecord> testCasesItemReader,
                                   ItemProcessor<TERecord, TestResultRecord> testCaseProcessor,
                                   ItemWriter<TestResultRecord> testResultRecordItemWriter) {
