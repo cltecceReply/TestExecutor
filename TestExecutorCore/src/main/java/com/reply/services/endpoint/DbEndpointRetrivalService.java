@@ -1,5 +1,6 @@
 package com.reply.services.endpoint;
 
+import com.reply.model.EndpointServiceOut;
 import com.reply.repo.entity.ServiceDescription;
 import com.reply.repo.repository.ServiceDescriptionRepository;
 import com.reply.services.endpoint.IEndpointRetrievalService;
@@ -22,18 +23,18 @@ public class DbEndpointRetrivalService implements IEndpointRetrievalService {
 
 
     @Override
-    public Map<String, Pair<String, String>> retrieveEndpointsPerService() {
+    public Map<String, EndpointServiceOut> retrieveEndpointsPerService() {
         return repo.findAll()
                 .stream()
                 .collect(Collectors
-                        .toMap(ServiceDescription::getServiceName, el -> new ImmutablePair<>(el.getEndpointOpen(), el.getEndpointlegacy())));
+                        .toMap(ServiceDescription::getServiceName, el -> new EndpointServiceOut(el.getEndpointOpen(), el.getEndpointlegacy())));
     }
 
     @Override
-    public Pair<String, String> retrieveEndpointsPerService(String serviceName) throws ServiceNotFoundException {
+    public EndpointServiceOut retrieveEndpointsPerService(String serviceName) throws ServiceNotFoundException {
         ServiceDescription desc = repo.findByServiceName(serviceName);
         if (desc == null)
             throw new ServiceNotFoundException("Endpoint not found for service: " + serviceName);
-        return new ImmutablePair<>(desc.getEndpointOpen(), desc.getEndpointlegacy());
+        return new EndpointServiceOut(desc.getEndpointOpen(), desc.getEndpointlegacy());
     }
 }

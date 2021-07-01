@@ -1,6 +1,7 @@
 package com.reply.services.impl;
 
 import com.reply.io.dto.TERecord;
+import com.reply.model.EndpointServiceOut;
 import com.reply.services.endpoint.EndpointRetrievalService;
 import com.reply.services.endpoint.IEndpointRetrievalService;
 import com.reply.services.invoker.IWebServiceInvoker;
@@ -48,7 +49,7 @@ public class TestCaseProcessorTest  extends TestCaseProcessor{
         this.wsInvocator = wsInvocatorService;
         IEndpointRetrievalService service = mock(EndpointRetrievalService.class);
             when(service.retrieveEndpointsPerService(anyString()))
-                    .thenReturn(new ImmutablePair<>(endpointTarget, endpointActual));
+                    .thenReturn(new EndpointServiceOut(endpointTarget, endpointActual));
         this.endpointRetrievalService = service;
 
 

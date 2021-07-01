@@ -105,7 +105,7 @@ public class BatchConfiguration {
 
     }
     @Bean
-    protected Step stepDefinition(JdbcCursorItemReader<TERecord> testCasesItemReader,
+    protected Step testExecutionStep(JdbcCursorItemReader<TERecord> testCasesItemReader,
                                   ItemProcessor<TERecord, TestResultRecord> testCaseProcessor,
                                   ItemWriter<TestResultRecord> testResultRecordItemWriter) {
         return steps.get("TEST_EXECUTION")

@@ -5,6 +5,7 @@ import com.codahale.metrics.Snapshot;
 import com.reply.io.dto.TERecord;
 import com.reply.io.model.DbOperation;
 import com.reply.model.ComparisonOutcome;
+import com.reply.model.EndpointServiceOut;
 import com.reply.model.TestCaseProcessorOut;
 import com.reply.services.comparator.XmlComparatorService;
 import com.reply.services.endpoint.IEndpointRetrievalService;
@@ -75,14 +76,14 @@ public class TestCaseProcessor {
         List<DbOperation> writesExpected = new ArrayList<>();
         boolean writeMatch = true;
 
-        Pair<String, String> endpointTarget = endpointRetrievalService.retrieveEndpointsPerService(teRecord.getServiceName());
-        actualResult = wsInvocator.invokeService(endpointTarget.getLeft(), teRecord.getRequest());
+        EndpointServiceOut endpointTarget = endpointRetrievalService.retrieveEndpointsPerService(teRecord.getServiceName());
+        actualResult = wsInvocator.invokeService(endpointTarget.getActualEndpoint(), teRecord.getRequest());
         if (teRecord.isWrite()) {
             //Devo aspettare la fine dell'elaborazione per recuperare i dati sulle scritture
             actualResult.join();
             writesActual = this.retrieveWrites();
         }
-        expectedResult = wsInvocator.invokeService(endpointTarget.getRight(), teRecord.getRequest());
+        expectedResult = wsInvocator.invokeService(endpointTarget.getTargetEndpoint(), teRecord.getRequest());
         if (teRecord.isWrite()) {
             //Devo aspettare la fine dell'elaborazione per recuperare i dati sulle scritture
             actualResult.join();
@@ -149,14 +150,14 @@ public class TestCaseProcessor {
 //        "Service, count, ok, ko, mean, min, max, median"
         String pattern = StringUtils.repeat("|%13s", REPORT_ITEMS) + "%n";
         StringBuilder builder = new StringBuilder("\n");
-        Map<String, Pair<String, String>> services = endpointRetrievalService.retrieveEndpointsPerService();
+        Map<String, EndpointServiceOut> services = endpointRetrievalService.retrieveEndpointsPerService();
         builder.append(String.format(pattern, "SERVICE NAME", " COUNT", "OK", "KO",
                 "MEAN ACT(ms)", "MIN ACT(ms)", "MAX ACT(ms)", "MEDIAN ACT(ms)",
                 "MEAN EXP(ms)", "MIN EXP(ms)", "MAX EXP(ms)", "MEDIAN EXP(ms)"))
                 .append("|").append(StringUtils.repeat("-", 14*REPORT_ITEMS)).append("|\n");
-        for (Map.Entry<String, Pair<String, String>> entry : services.entrySet()) {
-            Snapshot snapshotAct = metricRegistry.timer(entry.getValue().getLeft()).getSnapshot();
-            Snapshot snapshotExp = metricRegistry.timer(entry.getValue().getRight()).getSnapshot();
+        for (Map.Entry<String, EndpointServiceOut> entry : services.entrySet()) {
+            Snapshot snapshotAct = metricRegistry.timer(entry.getValue().getActualEndpoint()).getSnapshot();
+            Snapshot snapshotExp = metricRegistry.timer(entry.getValue().getTargetEndpoint()).getSnapshot();
             long testOk = metricRegistry.counter(getRegisterName(entry.getKey(), true)).getCount();
             long testKo = metricRegistry.counter(getRegisterName(entry.getKey(), false)).getCount();
             builder.append(String.format(pattern,

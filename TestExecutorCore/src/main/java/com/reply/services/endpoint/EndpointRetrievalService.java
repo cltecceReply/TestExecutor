@@ -1,5 +1,6 @@
 package com.reply.services.endpoint;
 
+import com.reply.model.EndpointServiceOut;
 import com.reply.services.endpoint.IEndpointRetrievalService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -16,25 +17,25 @@ import java.util.Map;
 @Service
 public class EndpointRetrievalService implements IEndpointRetrievalService {
 
-    Map<String, Pair<String, String>> endpointsMapping;
+    Map<String, EndpointServiceOut> endpointsMapping;
 
     public EndpointRetrievalService(@Value("#{${services.endpoints:null}}") Map<String, List<String>> endpoints){
         endpointsMapping = new HashMap<>();
         if(endpoints != null){
             log.info("Endpoints Loaded: {}", endpoints);
             for(Map.Entry<String, List<String>> entry: endpoints.entrySet()) {
-                endpointsMapping.put(entry.getKey(), new ImmutablePair<>(entry.getValue().get(0), entry.getValue().get(1)));
+                endpointsMapping.put(entry.getKey(), new EndpointServiceOut(entry.getValue().get(0), entry.getValue().get(1)));
             }
         }
     }
 
     @Override
-    public Map<String, Pair<String, String>> retrieveEndpointsPerService() {
+    public Map<String, EndpointServiceOut> retrieveEndpointsPerService() {
         return endpointsMapping;
     }
 
     @Override
-    public Pair<String, String> retrieveEndpointsPerService(String serviceName) throws ServiceNotFoundException {
+    public EndpointServiceOut retrieveEndpointsPerService(String serviceName) throws ServiceNotFoundException {
         if(!endpointsMapping.containsKey(serviceName))
             throw new ServiceNotFoundException("Endpoint not found for service: "+serviceName);
         return endpointsMapping.get(serviceName);
