@@ -26,7 +26,7 @@ public class IoEventJsonDeserializerV2 extends StdDeserializer<IoEventDto> {
     }
     @Override
     public IoEventDto deserialize(JsonParser jp, DeserializationContext ctxt)
-            throws IOException, JsonProcessingException {
+            throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         IoEventDto ioEventDto = new IoEventDto();
 

@@ -10,7 +10,7 @@ import java.util.Map;
 public class IoOperationDto implements Serializable {
 
 
-    EventTypeEnum eventType;
-    Map<String, String> data;
+    private EventTypeEnum eventType;
+    private Map<String, String> data;
 }
 

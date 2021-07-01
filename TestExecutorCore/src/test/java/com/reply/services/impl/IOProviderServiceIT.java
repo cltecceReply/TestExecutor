@@ -1,5 +1,6 @@
 package com.reply.services.impl;
 
+import com.reply.io.model.DbOperation;
 import com.reply.services.writes.kafka.IOProviderService;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -8,6 +9,7 @@ import com.reply.annotations.IgnoreDuringTest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,6 +26,7 @@ import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -107,7 +110,8 @@ public class IOProviderServiceIT {
             log.error("Unable to wait");
             Thread.currentThread().interrupt();
         }
-        log.info("{}", providerService.getAndFlush());
+        List<DbOperation> list = providerService.getAndFlush();
+        Assert.assertFalse(list.isEmpty());
     }
 
 }

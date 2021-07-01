@@ -1,10 +1,7 @@
 package com.reply.services.endpoint;
 
 import com.reply.model.EndpointServiceOut;
-import com.reply.services.endpoint.IEndpointRetrievalService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 

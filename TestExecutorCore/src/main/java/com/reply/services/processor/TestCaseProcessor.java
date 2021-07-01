@@ -13,7 +13,6 @@ import com.reply.services.invoker.IWebServiceInvoker;
 import com.reply.services.writes.IIOProviderService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,8 +32,8 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class TestCaseProcessor {
 
-    protected final static String OK_SUFFIX = "_OK";
-    protected final static String KO_SUFFIX = "_KO";
+    protected static final String OK_SUFFIX = "_OK";
+    protected static final String KO_SUFFIX = "_KO";
     private static final int REPORT_ITEMS = 12;
 
     @Value("${comparison.verbose:false}")
@@ -154,7 +153,7 @@ public class TestCaseProcessor {
         builder.append(String.format(pattern, "SERVICE NAME", " COUNT", "OK", "KO",
                 "MEAN ACT(ms)", "MIN ACT(ms)", "MAX ACT(ms)", "MEDIAN ACT(ms)",
                 "MEAN EXP(ms)", "MIN EXP(ms)", "MAX EXP(ms)", "MEDIAN EXP(ms)"))
-                .append("|").append(StringUtils.repeat("-", 14*REPORT_ITEMS)).append("|\n");
+                .append("|").append(StringUtils.repeat("-", 14 * REPORT_ITEMS)).append("|\n");
         for (Map.Entry<String, EndpointServiceOut> entry : services.entrySet()) {
             Snapshot snapshotAct = metricRegistry.timer(entry.getValue().getActualEndpoint()).getSnapshot();
             Snapshot snapshotExp = metricRegistry.timer(entry.getValue().getTargetEndpoint()).getSnapshot();

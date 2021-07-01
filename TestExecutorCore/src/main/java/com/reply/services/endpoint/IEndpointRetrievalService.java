@@ -2,7 +2,6 @@ package com.reply.services.endpoint;
 
 
 import com.reply.model.EndpointServiceOut;
-import org.apache.commons.lang3.tuple.Pair;
 
 import javax.management.ServiceNotFoundException;
 import java.util.Map;
